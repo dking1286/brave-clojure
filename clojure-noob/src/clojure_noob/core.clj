@@ -78,12 +78,53 @@
     (fn [accumulator next]
       (into accumulator #{(f next)}))
     #{}
-    collection))           
+    collection))
+
+(def asym-alien-parts
+  [{:name "head" :size 3}
+   {:name "arm-1" :size 2}
+   {:name "hand-1" :size 1}])
+
+(defn matching-alien-parts
+  [{:keys [name size]}]
+  (map
+    (fn [digitString]
+      {:name (clojure.string/replace name #"1$" digitString)
+       :size size})
+    ["2" "3" "4" "5"]))
+
+(defn symmetrize-alien-parts
+  [asymmetrical-parts]
+  (reduce
+    (fn [symmetrical-parts next]
+      (into symmetrical-parts 
+        (set (concat [next] (matching-alien-parts next)))))
+    []
+    asymmetrical-parts))
+
+(defn matching-n-parts
+  [n {:keys [name size]}]
+  (map
+    (fn [digitString]
+      {:name (clojure.string/replace name #"1$" digitString)
+       :size size})
+    (map
+      (fn [num] (str num))
+      (map 
+        (fn [num] (+ num 1))
+        (vec (range 1 n))))))
+
+(defn symmetrize-n-parts
+  [n asymmetrical-parts]
+  (reduce
+    (fn [symmetrical-parts next]
+      (into symmetrical-parts
+        (set (concat [next] (matching-n-parts n next)))))
+    []
+    asymmetrical-parts))
 
 (defn -main
   []
   (println
-    (mapset2
-      (fn [num] (* num 2))
-      [1 2 3 3])))
+    (symmetrize-n-parts 10 asym-alien-parts)))
  
